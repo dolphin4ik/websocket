@@ -130,7 +130,7 @@ nohup php artisan socket:chat start > /dev/null &
 
 And your js on front will be like this:
 ```javascript
-var ws = new WebSocket("ws://127.0.0.1:8000/");
+var ws = new WebSocket("ws://127.0.0.1:1234/");
 ws.onopen = function() { 
     console.log('socket: open');
 };
