@@ -1,6 +1,6 @@
 ## Simple websocket server
 
-Fork of [Cherry-Pie/websocket](https://github.com/Cherry-Pie/websocket) for Laravel 4/5 integration.
+Fork of [Cherry-Pie/websocket](https://github.com/Cherry-Pie/websocket) for Laravel 5 integration.
 
 ### Installation
 ```bash
