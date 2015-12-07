@@ -1,6 +1,6 @@
 ## Simple websocket server
 
-Fork of [morozovsk/websocket](https://github.com/morozovsk/websocket) for Laravel 4/5 integration.
+Fork of [Cherry-Pie/websocket](https://github.com/Cherry-Pie/websocket) for Laravel 4/5 integration.
 
 ### Installation
 ```bash
@@ -25,57 +25,89 @@ Add to config/app.php:
 Sample command:
 
 ```php
+namespace App\Console\Commands;
+
 use Illuminate\Console\Command;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Input\InputArgument;
 
-class ChatCommand extends Command 
+use Socket;
+
+class ChatCommand extends Command
 {
-    protected $name = 'socket:chat';
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'socket:chat {action?}';
 
-    protected $description = "chat command";
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Command description';
 
-    public function fire()
+    /**
+     * Create a new command instance.
+     *
+     * @return void
+     */
+    public function __construct()
     {
-        Socket::init($this->argument('action'), array(
-            'class' => 'ChatWebsocketDaemonHandler',
-            'pid' => '/tmp/websocket_chat.pid',
-            'websocket' => 'tcp://127.0.0.1:8000',
-            //'localsocket' => 'tcp://127.0.0.1:8010',
-            //'master' => 'tcp://127.0.0.1:8020',
-            //'eventDriver' => 'event'
-        ));
-    } // end fire
-    
-    protected function getArguments()
+        parent::__construct();
+    }
+
+    /**
+     * Execute the console command.
+     *
+     * @return mixed
+     */
+    public function handle()
     {
-        return array(
-            array('action', InputArgument::REQUIRED, 'start|stop|restart'),
-        );
-    } // end getArguments
-    
-    protected function getOptions()
-    {
-        return array();
-    } // end getOptions
+        $addr = '127.0.0.1';
+        $port = '1234';
+
+        $commands = array('start','stop','restart');
+        if(!in_array($this->argument('action'), $commands)){
+            $this->info("Need command! - start|stop|restart");
+        }else{
+            Socket::init($this->argument('action'), array(
+                'class' => \App\Socket\Daemon::class,
+                'pid' => '/tmp/websocket_chat.pid',
+                'websocket' => 'tcp://'.$addr.':'.$port,
+                //'localsocket' => 'tcp://127.0.0.1:8010',
+                //'master' => 'tcp://127.0.0.1:8020',
+                //'eventDriver' => 'event'
+            ));
+            $this->info('done');
+        }
+    }
 }
 ```
 
 
-Sample handler class:
+Sample handler class in `app\Socket\Daemon.php`:
 ```php
-class ChatWebsocketDaemonHandler extends WebsocketDaemon
+namespace App\Socket;
+
+use Yaro\Socket\Websocket\WebsocketDaemon;
+
+class Daemon extends WebsocketDaemon
 {
     protected function onOpen($connectionId, $info)
     {
+        echo 'opened #'.$connectionId.PHP_EOL;
     }
 
     protected function onClose($connectionId) 
     {
+        echo 'closed #'.$connectionId.PHP_EOL;
     }
 
     protected function onMessage($connectionId, $data, $type)
     {
+        echo '#'.$connectionId.' -> '.$data.PHP_EOL;
+
         if (!strlen($data)) {
             return;
         }
@@ -92,7 +124,7 @@ class ChatWebsocketDaemonHandler extends WebsocketDaemon
 
 And run your command (command from example):
 ```shell
-php artisan socket:chat
+nohup php artisan socket:chat start > /dev/null &
 ```
 
 
