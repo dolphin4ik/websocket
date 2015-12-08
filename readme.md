@@ -141,4 +141,4 @@ ws.onmessage = function(evt) {
     console.log(evt.data);
 };
 ```
-Or u can use [dolphin4ik/Sockt](https://github.com/dolphin4ik/Sockt)
+Or u can use [Sockt](https://github.com/dolphin4ik/Sockt)
